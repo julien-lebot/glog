@@ -54,15 +54,32 @@ var (
 	userName = "unknownuser"
 )
 
+func queryCurrentUserName() (name string) {
+	// On Windows nanoserver, the call to `user.Current` will panic
+	// because of a missing DLL: netapi32.dll
+	// If the call fails, we return the empty string
+	defer func() {
+		if r := recover(); r != nil {
+			name = ""
+		}
+	}()
+
+	current, err := user.Current()
+	if err != nil {
+		return ""
+	}
+
+	return current.Username
+}
+
 func init() {
 	h, err := os.Hostname()
 	if err == nil {
 		host = shortHostname(h)
 	}
 
-	current, err := user.Current()
-	if err == nil {
-		userName = current.Username
+	if currentUserName := queryCurrentUserName(); currentUserName != "" {
+		userName = currentUserName
 	}
 
 	// Sanitize userName since it may contain filepath separators on Windows.
