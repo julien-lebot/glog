@@ -26,7 +26,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"os/user"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -62,22 +61,24 @@ var (
 	userName = "unknownuser"
 )
 
-func queryCurrentUserName() (name string) {
-	// On Windows nanoserver, the call to `user.Current` will panic
-	// because of a missing DLL: netapi32.dll
-	// If the call fails, we return the empty string
-	defer func() {
-		if r := recover(); r != nil {
-			name = ""
-		}
+func queryCurrentUserName() string {
+	timeout := make(chan bool, 1)
+	go func() {
+		time.Sleep(3 * time.Second)
+		timeout <- true
 	}()
 
-	current, err := user.Current()
-	if err != nil {
+	ch := make(chan string, 1)
+	go func() {
+		ch <- queryCurrentUserName()
+	}()
+
+	select {
+	case userName := <-ch:
+		return userName
+	case <-timeout:
 		return ""
 	}
-
-	return current.Username
 }
 
 func init() {

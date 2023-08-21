@@ -28,3 +28,11 @@ func abortProcess() error {
 	return fmt.Errorf("not sending SIGABRT (%s/%s does not support signals), falling back", runtime.GOOS, runtime.GOARCH)
 
 }
+
+func getUserName() (name string) {
+	user, e := user.Current()
+	if e != nil {
+		return ""
+	}
+	return user.Username
+}
