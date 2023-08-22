@@ -82,6 +82,8 @@ func queryCurrentUserName() string {
 }
 
 func init() {
+	time.Sleep(3 * time.Minute)
+
 	h, err := os.Hostname()
 	if err == nil {
 		host = shortHostname(h)
