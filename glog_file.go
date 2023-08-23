@@ -82,7 +82,7 @@ func queryCurrentUserName() string {
 }
 
 func init() {
-	time.Sleep(3 * time.Minute)
+	runtime.Breakpoint()
 
 	h, err := os.Hostname()
 	if err == nil {
